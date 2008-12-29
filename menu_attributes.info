@@ -1,0 +1,5 @@
+; $Id$
+name = "Menu Attributes"
+description = "Allows administrators to specify custom attributes for menu items."
+package = "Menu"
+core = 6.x

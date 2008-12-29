@@ -1,0 +1,96 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Alters the menu form to allow the administrator to specify additional attributes for the menu link
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function menu_attributes_perm() {
+  return array('administer menu attributes');
+}
+
+
+function menu_attributes_form_alter(&$form, $form_state, $form_id) {
+  if ('menu_edit_item' == $form_id) {
+
+	}
+
+  if ((isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id) || ('menu_edit_item' == $form_id)) {
+    if ($form['#node']->type .'_node_form' == $form_id) { // It's the node edit form
+			$item = $form['#node']->menu;
+		} else {
+			$item = $form['menu']['#item'];
+		}
+
+		if (!isset($form['menu'])) { //Check to see whether the menu.module has altered the form yet
+			$form['menu'] = array(
+				'#type' => 'fieldset',
+				'#title' => t('Menu settings'),
+				'#access' => user_access('administer menu'),
+				'#collapsible' => TRUE,
+				'#collapsed' => FALSE,
+				'#tree' => TRUE,
+				'#weight' => -2,
+				'#attributes' => array('class' => 'menu-item-form'),
+			);
+		}
+    $form['menu']['options'] = array(
+				'#type' => 'fieldset',
+				'#title' => t('Menu Item Attributes'),
+				'#access' => user_access('administer menu attributes'),
+				'#collapsible' => TRUE,
+				'#collapsed' => TRUE,
+				'#tree' => TRUE,
+				'#weight' => 50,
+    );
+		$form['menu']['options']['attributes']['id'] = array(
+			'#type' => 'textfield',
+      '#title' => t('Id attribute'),
+      '#default_value' => $item['options']['attributes']['id'],
+      '#required' => FALSE,
+    );
+		$form['menu']['options']['attributes']['name'] = array(
+			'#type' => 'textfield',
+      '#title' => t('Name attribute'),
+      '#default_value' => $item['options']['attributes']['name'],
+      '#required' => FALSE,
+    );
+		$form['menu']['options']['attributes']['rel'] = array(
+			'#type' => 'textfield',
+      '#title' => t('Rel attribute'),
+			'#description' => t('Enter \'nofollow\' here to nofollow this link'),
+      '#default_value' => $item['options']['attributes']['rel'],
+      '#required' => FALSE,
+    );
+		$form['menu']['options']['attributes']['class'] = array(
+			'#type' => 'textfield',
+      '#title' => t('Class attribute'),
+			'#description' => t('Enter additional classes to be added to the menu item'),
+      '#default_value' => $item['options']['attributes']['class'],
+      '#required' => FALSE,
+    );
+		$form['menu']['options']['attributes']['style'] = array(
+			'#type' => 'textfield',
+      '#title' => t('Style attribute'),
+			'#description' => t('Enter additional styles to be applied to the menu item'),
+      '#default_value' => $item['options']['attributes']['style'],
+      '#required' => FALSE,
+    );
+  }
+}
+
+function menu_attributes_menu_link_alter(&$item, $menu) {
+	if (is_array($item['options']['attributes'])) {
+		foreach ($item['options']['attributes'] as $key=>$value) {
+			if (empty($value)) {
+				unset($item['options']['attributes'][$key]);
+			}
+		}
+	}
+}
+
+
