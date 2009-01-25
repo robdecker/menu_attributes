@@ -15,10 +15,6 @@ function menu_attributes_perm() {
 
 
 function menu_attributes_form_alter(&$form, $form_state, $form_id) {
-  if ('menu_edit_item' == $form_id) {
-
-  }
-
   if ((isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id) || ('menu_edit_item' == $form_id)) {
     if ($form['#node']->type .'_node_form' == $form_id) { // It's the node edit form
       $item = $form['#node']->menu;
@@ -40,7 +36,7 @@ function menu_attributes_form_alter(&$form, $form_state, $form_id) {
     }
     $form['menu']['options'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Menu Item Attributes'),
+        '#title' => t('Menu item attributes'),
         '#access' => user_access('administer menu attributes'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
@@ -93,6 +89,14 @@ function menu_attributes_form_alter(&$form, $form_state, $form_id) {
       '#description' => t('Enter additional styles to be applied to the menu item'),
       '#default_value' => $item['options']['attributes']['style'],
       '#required' => FALSE,
+    );
+    $form['menu']['options']['attributes']['accesskey'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Accesskey attribute'),
+      '#description' => t('Specify an <a href="http://en.wikipedia.org/wiki/Access_keys">accesskey</a> for this menu item'),
+      '#default_value' => $item['options']['attributes']['accesskey'],
+      '#required' => FALSE,
+			'#maxlength' => 1,
     );
   }
 }
