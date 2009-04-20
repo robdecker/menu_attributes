@@ -1,3 +1,39 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * Provides the install, update, and uninstall functions for the Menu Attributes module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function menu_attributes_install() {
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'menu_attributes'");
+}
+
+function menu_attributes_update_1() {
+  $ret = array();
+  $ret[] = db_query("UPDATE {system} SET weight = 10 WHERE name = 'menu_attributes'");
+  return $ret;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function menu_attributes_uninstall() {
+  variable_del('menu_attributes_id_enable');
+  variable_del('menu_attributes_name_enable');
+  variable_del('menu_attributes_name_default');
+  variable_del('menu_attributes_target_enable');
+  variable_del('menu_attributes_target_default');
+  variable_del('menu_attributes_rel_enable');
+  variable_del('menu_attributes_rel_default');
+  variable_del('menu_attributes_class_enable');
+  variable_del('menu_attributes_class_default');
+  variable_del('menu_attributes_style_enable');
+  variable_del('menu_attributes_style_default');
+  variable_del('menu_attributes_accesskey_enable');
+  variable_del('menu_attributes_accesskey_default');
+}
