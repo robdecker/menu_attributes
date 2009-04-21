@@ -15,7 +15,7 @@ function menu_attributes_install() {
 
 function menu_attributes_update_1() {
   $ret = array();
-  $ret[] = db_query("UPDATE {system} SET weight = 10 WHERE name = 'menu_attributes'");
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'menu_attributes'");
   return $ret;
 }
 
