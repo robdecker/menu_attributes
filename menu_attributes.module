@@ -110,10 +110,14 @@ function menu_attributes_get_menu_attribute_info() {
 function menu_attributes_form_menu_edit_item_alter(&$form, $form_state) {
   $item = $form['original_item']['#value'];
   _menu_attributes_form_alter($form, $item);
+
   // Because this form uses a special $form['description'] field which is
   // really the 'title' attribute, we need to add special pre-submit handling
   // to ensure our field gets saved as the title attribute.
   array_unshift($form['#submit'], 'menu_attributes_form_menu_edit_item_submit');
+
+  // Hide the 'description' field since we will be using our own 'title' field.
+  $form['description']['#access'] = FALSE;
 }
 
 /**
@@ -137,7 +141,7 @@ function menu_attributes_form_alter(&$form, $form_state, $form_id) {
   if (!empty($form['#node_edit_form']) && isset($form['menu'])) {
     $item = $form['#node']->menu;
     _menu_attributes_form_alter($form['menu']['link'], $item);
-    $form['menu']['link']['options']['#type'] = 'container';
+    $form['menu']['link']['options']['attributes']['#type'] = 'container';
   }
 }
 
@@ -151,18 +155,16 @@ function menu_attributes_form_alter(&$form, $form_state, $form_id) {
  */
 function _menu_attributes_form_alter(array &$form, array $item = array()) {
   $form['options'] = array(
+    '#tree' => TRUE,
+    '#weight'=> 50,
+  );
+  $form['options']['attributes'] = array(
     '#type' => 'fieldset',
     '#title' => t('Menu item attributes'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE,
-    '#weight' => 50,
   );
-
-  // Hide the 'description' field since we will be using our own 'title' field.
-  if (isset($form['description'])) {
-    $form['description']['#access'] = FALSE;
-  }
 
   $attributes = menu_attributes_get_menu_attribute_info();
   foreach ($attributes as $attribute => $info) {
