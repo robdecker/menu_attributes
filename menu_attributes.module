@@ -239,11 +239,6 @@ function menu_attributes_form_menu_configure_alter(&$form, $form_state) {
     $form['attributes'][$attribute]["menu_attributes_{$attribute}_default"] = array(
       '#title' => t('Default'),
       '#description' => '',
-      '#states' => array(
-        'invisible' => array(
-          'input[name="menu_attributes_' . $attribute . '_enable"]' => array('checked' => FALSE),
-        ),
-      ),
     ) + $info['form'];
   }
 
