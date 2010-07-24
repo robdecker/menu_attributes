@@ -1,5 +1,5 @@
 ; $Id$
-name = "Menu Attributes"
+name = Menu attributes
 description = "Allows administrators to specify custom attributes for menu items."
-package = "Menu"
+dependencies[] = menu
 core = 6.x
