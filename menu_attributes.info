@@ -1,5 +1,8 @@
 ; $Id$
-name = "Menu Attributes"
+name = Menu attributes
 description = "Allows administrators to specify custom attributes for menu items."
-package = "Menu"
-core = 6.x
+dependencies[] = menu
+core = 7.x
+files[] = menu_attributes.module
+files[] = menu_attributes.install
+configure = admin/structure/menu/settings
