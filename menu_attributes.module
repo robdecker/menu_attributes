@@ -135,14 +135,14 @@ function menu_attributes_form_menu_edit_item_submit($form, &$form_state) {
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_FORM_ID_alter().
  *
  * Adds menu attribute options to the node's edit menu item form.
  *
  * @see _menu_attributes_form_alter()
  */
-function menu_attributes_form_alter(&$form, $form_state, $form_id) {
-  if (!empty($form['#node_edit_form']) && isset($form['menu'])) {
+function menu_attributes_form_node_form_alter(&$form, $form_state) {
+  if (isset($form['menu'])) {
     $item = $form['#node']->menu;
     _menu_attributes_form_alter($form['menu']['link'], $item);
     $form['menu']['link']['options']['attributes']['#type'] = 'container';
