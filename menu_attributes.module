@@ -14,6 +14,10 @@ function menu_attributes_menu_link_alter(&$item, $menu) {
   if (isset($item['options']['attributes']) && is_array($item['options']['attributes'])) {
     // Filter out blank attributes.
     $item['options']['attributes'] = array_filter($item['options']['attributes'], 'drupal_strlen');
+    // Convert classes to an array.
+    if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {
+      $item['options']['attributes']['class'] = explode(' ', $item['options']['attributes']['class']);
+    }
   }
 }
 
@@ -172,6 +176,10 @@ function _menu_attributes_form_alter(array &$form, array $item = array()) {
     if (isset($item['options']['attributes'][$attribute])) {
       // If the menu link already has this attribute, use it.
       $info['form']['#default_value'] = $item['options']['attributes'][$attribute];
+      // Convert the classes array to a string for the form.
+      if ($attribute == 'class' && is_array($info['form']['#default_value'])) {
+        $info['form']['#default_value'] = implode(' ', $info['form']['#default_value']);
+      }
     }
     elseif ($item['mlid']) {
       // If this is an existing link, use the raw default (usually empty).
