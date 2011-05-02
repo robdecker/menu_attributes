@@ -117,25 +117,7 @@ function menu_attributes_get_menu_attribute_info() {
  */
 function menu_attributes_form_menu_edit_item_alter(&$form, $form_state) {
   $item = $form['original_item']['#value'];
-  _menu_attributes_form_alter($form, $item);
-
-  // Because this form uses a special $form['description'] field which is
-  // really the 'title' attribute, we need to add special pre-submit handling
-  // to ensure our field gets saved as the title attribute.
-  array_unshift($form['#submit'], 'menu_attributes_form_menu_edit_item_submit');
-
-  // Hide the 'description' field since we will be using our own 'title' field.
-  $form['description']['#access'] = FALSE;
-}
-
-/**
- * Form submit handler for menu_edit_item().
- *
- * Move the title attributes value into the 'description' value so that it
- * will get properly saved by menu_edit_item_submit().
- */
-function menu_attributes_form_menu_edit_item_submit($form, &$form_state) {
-  $form_state['values']['description'] = $form_state['values']['options']['attributes']['title'];
+  _menu_attributes_form_alter($form, $item, $form);
 }
 
 /**
@@ -148,7 +130,7 @@ function menu_attributes_form_menu_edit_item_submit($form, &$form_state) {
 function menu_attributes_form_node_form_alter(&$form, $form_state) {
   if (isset($form['menu'])) {
     $item = $form['#node']->menu;
-    _menu_attributes_form_alter($form['menu']['link'], $item);
+    _menu_attributes_form_alter($form['menu']['link'], $item, $form);
     $form['menu']['link']['options']['attributes']['#type'] = 'container';
   }
 }
@@ -161,7 +143,7 @@ function menu_attributes_form_node_form_alter(&$form, $form_state) {
  * @param $item
  *   The optional existing menu item for context.
  */
-function _menu_attributes_form_alter(array &$form, array $item = array()) {
+function _menu_attributes_form_alter(array &$form, array $item = array(), array &$complete_form) {
   $form['options'] = array(
     '#tree' => TRUE,
     '#weight'=> 50,
@@ -192,6 +174,53 @@ function _menu_attributes_form_alter(array &$form, array $item = array()) {
     $form['options']['attributes'][$attribute] = $info['form'] + array(
       '#access' => $info['enabled'],
     );
+  }
+  // Add form values for the reset of $item['options'] and
+  // $item['options']['attributes'] so the values will carry over during save.
+  foreach ($item['options'] as $key => $value) {
+    if ($key !== 'attributes' && !isset($form['options'][$key])) {
+      $form['options'][$key] = array(
+        '#type' => 'value',
+        '#value' => $value,
+      );
+    }
+  }
+  if (isset($item['options']['attributes'])) {
+    foreach ($item['options']['attributes'] as $key => $value) {
+      if (!isset($form['options']['attributes'][$key])) {
+        $form['options']['attributes'][$key] = array(
+          '#type' => 'value',
+          '#value' => $value,
+        );
+      }
+    }
+  }
+
+  // Hide the 'description' field since we will be using our own 'title' field.
+  if (isset($form['description'])) {
+    $form['description']['#access'] = FALSE;
+
+    // Because this form uses a special $form['description'] field which is
+    // really the 'title' attribute, we need to add special pre-submit handling
+    // to ensure our field gets saved as the title attribute.
+    array_unshift($complete_form['#submit'], '_menu_attributes_form_submit');
+  }
+
+  $form['options']['attributes']['#access'] = (bool) element_get_visible_children($form['options']['attributes']);
+}
+
+/**
+ * Form submit handler for menu item links.
+ *
+ * Move the title attributes value into the 'description' value so that it
+ * will get properly saved.
+ */
+function _menu_attributes_form_submit($form, &$form_state) {
+  if (isset($form_state['values']['menu']['options']['attributes']['title'])) {
+    $form_state['values']['menu']['description'] = $form_state['values']['menu']['options']['attributes']['title'];
+  }
+  elseif (isset($form_state['values']['options']['attributes']['title'])) {
+    $form_state['values']['description'] = $form_state['values']['options']['attributes']['title'];
   }
 }
 

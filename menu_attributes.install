@@ -55,7 +55,7 @@ function menu_attributes_update_7000(&$sandbox) {
     $sandbox['max'] = db_query("SELECT COUNT(DISTINCT mlid) FROM {menu_links} WHERE options LIKE '%s:5:\"class\";s:%'")->fetchField();
   }
 
-  // Process twenty link at a time.
+  // Process twenty links at a time.
   $limit = 20;
 
   $links = db_query_range("SELECT mlid, options FROM {menu_links} WHERE mlid > :mlid AND options LIKE '%s:5:\"class\";s:%' ORDER BY mlid", 0, $limit, array(':mlid' => $sandbox['current_mlid']))->fetchAllKeyed();

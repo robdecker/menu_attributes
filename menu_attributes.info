@@ -2,6 +2,4 @@ name = Menu attributes
 description = "Allows administrators to specify custom attributes for menu items."
 dependencies[] = menu
 core = 7.x
-files[] = menu_attributes.module
-files[] = menu_attributes.install
 configure = admin/structure/menu/settings
