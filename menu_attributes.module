@@ -203,7 +203,7 @@ function _menu_attributes_form_alter(array &$form, array $item = array()) {
  * @see menu_configure_form()
  */
 function menu_attributes_form_menu_configure_alter(&$form, $form_state) {
-  $form['attributes'] = array(
+  $form['attributes_title'] = array(
     '#type' => 'item',
     '#title' => t('Menu item attribute options'),
   );
