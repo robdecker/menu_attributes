@@ -144,10 +144,9 @@ function menu_attributes_form_node_form_alter(&$form, $form_state) {
  *   The optional existing menu item for context.
  */
 function _menu_attributes_form_alter(array &$form, array $item = array(), array &$complete_form) {
-  $form['options'] = array(
-    '#tree' => TRUE,
-    '#weight'=> 50,
-  );
+  $form['options']['#tree'] = TRUE;
+  $form['options']['weight'] = 50;
+
   $form['options']['attributes'] = array(
     '#type' => 'fieldset',
     '#title' => t('Menu item attributes'),
@@ -175,6 +174,7 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
       '#access' => $info['enabled'],
     );
   }
+
   // Add form values for the reset of $item['options'] and
   // $item['options']['attributes'] so the values will carry over during save.
   foreach ($item['options'] as $key => $value) {
