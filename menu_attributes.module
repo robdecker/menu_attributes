@@ -147,6 +147,9 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
   $form['options']['#tree'] = TRUE;
   $form['options']['weight'] = 50;
 
+  // Unset the previous value so that the new values get saved.
+  unset($form['options']['#value']['attributes']);
+
   $form['options']['attributes'] = array(
     '#type' => 'fieldset',
     '#title' => t('Menu item attributes'),
