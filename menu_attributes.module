@@ -145,7 +145,7 @@ function menu_attributes_form_node_form_alter(&$form, $form_state) {
  */
 function _menu_attributes_form_alter(array &$form, array $item = array(), array &$complete_form) {
   $form['options']['#tree'] = TRUE;
-  $form['options']['weight'] = 50;
+  $form['options']['#weight'] = 50;
 
   // Unset the previous value so that the new values get saved.
   unset($form['options']['#value']['attributes']);
