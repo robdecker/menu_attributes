@@ -241,6 +241,9 @@ function menu_attributes_form_menu_configure_alter(&$form, $form_state) {
   );
   $form['attributes_vertical_tabs'] = array(
     '#type' => 'vertical_tabs',
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'menu_attributes') . '/menu_attributes.js'),
+    ),
   );
 
   $attributes = menu_attributes_get_menu_attribute_info();
