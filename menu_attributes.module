@@ -13,7 +13,7 @@ function menu_attributes_menu_link_alter(&$item, $menu) {
   if (isset($item['options']['attributes']) && is_array($item['options']['attributes'])) {
     // Filter out blank attributes.
     foreach ($item['options']['attributes'] as $key => $value) {
-      if (empty($value)) {
+      if ((is_array($value) && empty($value)) || is_string($value) && !drupal_strlen($value)) {
         unset($item['options']['attributes'][$key]);
       }
     }
