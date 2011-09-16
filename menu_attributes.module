@@ -7,6 +7,18 @@
  */
 
 /**
+ * Implements hook_permission().
+ */
+function menu_attributes_permission() {
+  return array(
+    'administer menu attributes' => array(
+      'title' => t('Administer menu attributes'),
+      'description' => t('Administer menu attributes.'),
+    ),
+  );
+}
+
+/**
  * Implements hook_menu_link_alter().
  */
 function menu_attributes_menu_link_alter(&$item, $menu) {
@@ -144,6 +156,9 @@ function menu_attributes_form_node_form_alter(&$form, $form_state) {
  *   The optional existing menu item for context.
  */
 function _menu_attributes_form_alter(array &$form, array $item = array(), array &$complete_form) {
+  // Restrict access to the new form elements.
+  $form['options']['attributes']['#access'] = user_access('administer menu attributes');
+
   $form['options']['#tree'] = TRUE;
   $form['options']['#weight'] = 50;
 
@@ -235,6 +250,10 @@ function _menu_attributes_form_submit($form, &$form_state) {
  * @see menu_configure_form()
  */
 function menu_attributes_form_menu_configure_alter(&$form, $form_state) {
+  if (!user_access('administer menu attributes')) {
+    return;
+  }
+
   $form['attributes_title'] = array(
     '#type' => 'item',
     '#title' => t('Menu item attribute options'),
