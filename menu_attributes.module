@@ -140,7 +140,7 @@ function menu_attributes_form_menu_edit_item_alter(&$form, $form_state) {
  * @see _menu_attributes_form_alter()
  */
 function menu_attributes_form_node_form_alter(&$form, $form_state) {
-  if (isset($form['menu'])) {
+  if (isset($form['menu']['link'])) {
     $item = $form['#node']->menu;
     _menu_attributes_form_alter($form['menu']['link'], $item, $form);
     $form['menu']['link']['options']['attributes']['#type'] = 'container';
