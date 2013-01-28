@@ -156,9 +156,6 @@ function menu_attributes_form_node_form_alter(&$form, $form_state) {
  *   The optional existing menu item for context.
  */
 function _menu_attributes_form_alter(array &$form, array $item = array(), array &$complete_form) {
-  // Restrict access to the new form elements.
-  $form['options']['attributes']['#access'] = user_access('administer menu attributes');
-
   $form['options']['#tree'] = TRUE;
   $form['options']['#weight'] = 50;
 
@@ -224,7 +221,10 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
     array_unshift($complete_form['#submit'], '_menu_attributes_form_submit');
   }
 
-  $form['options']['attributes']['#access'] = (bool) element_get_visible_children($form['options']['attributes']);
+  // Restrict access to the new form elements.
+  $has_visible_children = (bool) element_get_visible_children($form['options']['attributes']);
+  $user_has_access = user_access('administer menu attributes');
+  $form['options']['attributes']['#access'] = ($has_visible_children && $user_has_access);
 }
 
 /**
