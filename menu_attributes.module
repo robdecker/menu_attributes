@@ -38,7 +38,7 @@ function menu_attributes_menu_link_alter(&$item, $menu) {
 }
 
 /**
- * Implements hook_menu_attriute_info().
+ * Implements hook_menu_attribute_info().
  */
 function menu_attributes_menu_attribute_info() {
   $info['title'] = array(
