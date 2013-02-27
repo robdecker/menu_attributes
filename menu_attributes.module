@@ -32,7 +32,7 @@ function menu_attributes_menu_link_alter(&$item, $menu) {
 
     // Convert classes to an array.
     if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {
-      $item['options']['attributes']['class'] = explode(' ', $item['options']['attributes']['class']);
+      $item['options']['attributes']['class'] = array_filter(explode(' ', $item['options']['attributes']['class']));
     }
   }
 }
