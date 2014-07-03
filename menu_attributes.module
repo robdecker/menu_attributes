@@ -6,6 +6,9 @@
  * attributes for the menu link
  */
 
+define('MENU_ATTRIBUTES_LINK', 'attributes');
+define('MENU_ATTRIBUTES_ITEM', 'item_attributes');
+
 /**
  * Implements hook_permission().
  */
@@ -48,25 +51,31 @@ function menu_attributes_menu_attribute_info() {
       '#type' => 'textarea',
       '#rows' => 2,
     ),
+    'scope' => array(MENU_ATTRIBUTES_LINK),
   );
   $info['id'] = array(
     'label' => t('ID'),
     'description' => t('Specifies a unique ID for the link.'),
+    'scope' => array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM),
   );
   $info['name'] = array(
     'label' => t('Name'),
+    'scope' => array(MENU_ATTRIBUTES_LINK),
   );
   $info['rel'] = array(
     'label' => t('Relationship'),
     'description' => t("Specifies the relationship between the current page and the link. Enter 'nofollow' here to nofollow this link."),
+    'scope' => array(MENU_ATTRIBUTES_LINK),
   );
   $info['class'] = array(
     'label' => t('Classes'),
     'description' => t('Enter additional classes to be added to the link.'),
+    'scope' => array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM),
   );
   $info['style'] = array(
     'label' => t('Style'),
     'description' => t('Enter additional styles to be applied to the link.'),
+    'scope' => array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM),
   );
   $info['target'] = array(
     'label' => t('Target'),
@@ -81,6 +90,7 @@ function menu_attributes_menu_attribute_info() {
         '_parent' => 'Parent window (_parent)',
       ),
     ),
+    'scope' => array(MENU_ATTRIBUTES_LINK),
   );
   $info['accesskey'] = array(
     'label' => t('Access Key'),
@@ -89,6 +99,7 @@ function menu_attributes_menu_attribute_info() {
       '#maxlength' => 1,
       '#size' => 1,
     ),
+    'scope' => array(MENU_ATTRIBUTES_LINK),
   );
   return $info;
 }
@@ -160,8 +171,17 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
 
   // Unset the previous value so that the new values get saved.
   unset($form['options']['#value']['attributes']);
+  unset($form['options']['#value']['item_attributes']);
 
-  $form['options']['attributes'] = array(
+  $form['options'][MENU_ATTRIBUTES_LINK] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Menu link attributes'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#tree' => TRUE,
+  );
+
+  $form['options'][MENU_ATTRIBUTES_ITEM] = array(
     '#type' => 'fieldset',
     '#title' => t('Menu item attributes'),
     '#collapsible' => TRUE,
@@ -171,22 +191,30 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
 
   $attributes = menu_attributes_get_menu_attribute_info();
   foreach ($attributes as $attribute => $info) {
-    // Merge in the proper default value.
-    if (isset($item['options']['attributes'][$attribute])) {
-      // If the menu link already has this attribute, use it.
-      $info['form']['#default_value'] = $item['options']['attributes'][$attribute];
-      // Convert the classes array to a string for the form.
-      if ($attribute == 'class' && is_array($info['form']['#default_value'])) {
-        $info['form']['#default_value'] = implode(' ', $info['form']['#default_value']);
+    // If no scope is set, this attribute should be available to both link and item.
+    if (!isset($info['scope'])) {
+      $info['scope'] = array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM);
+    }
+
+    // Define fields for each scope.
+    foreach ($info['scope'] as $group) {
+      // Merge in the proper default value.
+      if (isset($item['options'][$group][$attribute])) {
+        // If the menu link already has this attribute, use it.
+        $info['form']['#default_value'] = $item['options'][$group][$attribute];
+        // Convert the classes array to a string for the form.
+        if ($attribute == 'class' && is_array($info['form']['#default_value'])) {
+          $info['form']['#default_value'] = implode(' ', $info['form']['#default_value']);
+        }
       }
+      elseif ($item['mlid']) {
+        // If this is an existing link, use the raw default (usually empty).
+        $info['form']['#default_value'] = $info['default'];
+      }
+      $form['options'][$group][$attribute] = $info['form'] + array(
+        '#access' => $info['enabled'],
+      );
     }
-    elseif ($item['mlid']) {
-      // If this is an existing link, use the raw default (usually empty).
-      $info['form']['#default_value'] = $info['default'];
-    }
-    $form['options']['attributes'][$attribute] = $info['form'] + array(
-      '#access' => $info['enabled'],
-    );
   }
 
   // Add form values for the reset of $item['options'] and
@@ -199,13 +227,15 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
       );
     }
   }
-  if (isset($item['options']['attributes'])) {
-    foreach ($item['options']['attributes'] as $key => $value) {
-      if (!isset($form['options']['attributes'][$key])) {
-        $form['options']['attributes'][$key] = array(
-          '#type' => 'value',
-          '#value' => $value,
-        );
+  foreach (array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM) as $group) {
+    if (isset($item['options'][$group])) {
+      foreach ($item['options'][$group] as $key => $value) {
+        if (!isset($form['options'][$group][$key])) {
+          $form['options'][$group][$key] = array(
+            '#type' => 'value',
+            '#value' => $value,
+          );
+        }
       }
     }
   }
@@ -286,5 +316,36 @@ function menu_attributes_form_menu_configure_alter(&$form, $form_state) {
         ),
       ),
     ) + $info['form'];
+  }
+}
+
+/**
+ * Implements MODULE_preprocess_HOOK().
+ *
+ * Adds appropriate attributes to the list item.
+ *
+ * @see theme_menu_link()
+ */
+function menu_attributes_preprocess_menu_link(&$variables) {
+  $options = &$variables['element']['#localized_options'];
+  $attributes = &$variables['element']['#attributes'];
+
+  if (isset($options['item_attributes'])) {
+    foreach ($options['item_attributes'] as $attribute => $value) {
+      if (!empty($value)) {
+        // Class get's special treatment, as it's an array and it should not replace existing values.
+        if ($attribute == 'class') {
+          $value = explode(' ', $value);
+          if (isset($attributes[$attribute])) {
+            $value = array_merge($attributes[$attribute], $value);
+          }
+        }
+        // Override the attribute.
+        $attributes[$attribute] = $value;
+      }
+    }
+
+    // Clean up, so we're not passing this to l().
+    unset($options['item_attributes']);
   }
 }
