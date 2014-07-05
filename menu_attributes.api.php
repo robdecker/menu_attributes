@@ -16,8 +16,9 @@
  *   - description: The attribute description.
  *   - form: A Form API array. Some default values for this array are provided
  *     in menu_attributes_get_menu_attribute_info().
- *   - scope: An array of scope options, MENU_ATTRIBUTES_LINK or MENU_ATTRIBUTES_ITEM
- *     or both. If no scope is provided, both will be assumed.
+ *   - scope: An array of scope options, MENU_ATTRIBUTES_LINK or
+ *     MENU_ATTRIBUTES_ITEM or both. If no scope is provided, both will
+ *     be assumed.
  *
  * @see menu_attributes_menu_attribute_info()
  * @see menu_attributes_get_menu_attribute_info()

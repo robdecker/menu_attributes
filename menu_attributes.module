@@ -191,7 +191,8 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
 
   $attributes = menu_attributes_get_menu_attribute_info();
   foreach ($attributes as $attribute => $info) {
-    // If no scope is set, this attribute should be available to both link and item.
+    // If no scope is set, this attribute should be available to both link
+    // and item.
     if (!isset($info['scope'])) {
       $info['scope'] = array(MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM);
     }
@@ -333,7 +334,8 @@ function menu_attributes_preprocess_menu_link(&$variables) {
   if (isset($options['item_attributes'])) {
     foreach ($options['item_attributes'] as $attribute => $value) {
       if (!empty($value)) {
-        // Class get's special treatment, as it's an array and it should not replace existing values.
+        // Class get's special treatment, as it's an array and it should not
+        // replace existing values.
         if ($attribute == 'class') {
           $value = explode(' ', $value);
           if (isset($attributes[$attribute])) {
