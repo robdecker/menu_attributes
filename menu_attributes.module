@@ -83,11 +83,11 @@ function menu_attributes_menu_attribute_info() {
     'form' => array(
       '#type' => 'select',
       '#options' => array(
-        '' => 'None (i.e. same window)',
-        '_blank' => 'New window (_blank)',
-        '_top' => 'Top window (_top)',
-        '_self' => 'Same window (_self)',
-        '_parent' => 'Parent window (_parent)',
+        '' => t('None (i.e. same window)'),
+        '_blank' => t('New window (_blank)'),
+        '_top' => t('Top window (_top)'),
+        '_self' => t('Same window (_self)'),
+        '_parent' => t('Parent window (_parent)'),
       ),
     ),
     'scope' => array(MENU_ATTRIBUTES_LINK),
