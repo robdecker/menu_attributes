@@ -177,7 +177,7 @@ function _menu_attributes_form_alter(array &$form, array $item = array(), array 
     '#type' => 'fieldset',
     '#title' => t('Menu link attributes'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#tree' => TRUE,
   );
 
