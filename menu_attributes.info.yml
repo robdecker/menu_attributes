@@ -1,0 +1,7 @@
+name: 'Menu attributes'
+description: 'Allows administrators to specify custom attributes for menu items.'
+core: 8.x
+type: module
+
+dependencies:
+  - menu_ui
