@@ -111,7 +111,6 @@ function menu_attributes_get_menu_attribute_info() {
     $info += [
       'form' => [],
       'enabled' => $config->get('attribute_enable.{$attribute}'),
-      '#description' => isset($info['description']) ? $info['description'] : '',
       '#default_value' => $config->get('attribute_enable.' . $attribute),
     ];
     $info['form'] += [
@@ -266,55 +265,6 @@ function _menu_attributes_form_submit($form, FormStateInterface $form_state) {
   }
   elseif (isset($values['options']['attributes']['title'])) {
     $values['description'] = $values['options']['attributes']['title'];
-  }
-}
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Alters the menu settings form with our menu attribute settings.
- *
- * @see menu_configure_form()
- */
-function menu_attributes_form_menu_configure_alter(&$form, FormStateInterface $form_state) {
-  if (!\Drupal::currentUser()->hasPermission('administer menu attributes')) {
-    return;
-  }
-
-  $form['attributes_title'] = [
-    '#type' => 'item',
-    '#title' => t('Menu item attribute options'),
-  ];
-
-  $form['attributes_vertical_tabs'] = [
-    '#type' => 'vertical_tabs',
-    '#attached' => [
-      'library' => ['menu_attributes/option_summary'],
-    ],
-  ];
-
-  $attributes = menu_attributes_get_menu_attribute_info();
-  foreach ($attributes as $attribute => $info) {
-    $form['attributes'][$attribute] = [
-      '#type' => 'fieldset',
-      '#title' => $info['label'],
-      '#group' => 'attributes_vertical_tabs',
-      '#description' => $info['form']['#description'],
-    ];
-    $form['attributes'][$attribute]["menu_attributes_{$attribute}_enable"] = [
-      '#type' => 'checkbox',
-      '#title' => t('Enable the @attribute attribute.', ['@attribute' => Unicode::strtolower($info['label'])]),
-      '#default_value' => $info['enabled'],
-    ];
-    $form['attributes'][$attribute]["menu_attributes_{$attribute}_default"] = [
-      '#title' => t('Default'),
-      '#description' => '',
-      '#states' => [
-        'invisible' => [
-          'input[name="menu_attributes_' . $attribute . '_enable"]' => ['checked' => FALSE],
-        ],
-      ],
-    ] + $info['form'];
   }
 }
 

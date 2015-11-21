@@ -2,7 +2,7 @@
 
 menu_attributes.settings:
   type: mapping
-  label: 'Menu Attributes settings'
+  label: 'Menu attributes settings'
   mapping:
     attribute_enable:
       type: mapping
