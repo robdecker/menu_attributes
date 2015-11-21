@@ -110,7 +110,7 @@ function menu_attributes_get_menu_attribute_info() {
   foreach ($attributes as $attribute => &$info) {
     $info += [
       'form' => [],
-      'enabled' => $config->get('attribute_enable.{$attribute}'),
+      'enabled' => $config->get('attribute_enable.' . $attribute),
       '#default_value' => $config->get('attribute_enable.' . $attribute),
     ];
     $info['form'] += [

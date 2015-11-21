@@ -52,8 +52,9 @@ class MenuAttributesSettingsForm extends ConfigFormBase {
       '#attached' => [
         'library' => ['menu_attributes/option_summary'],
       ],
-    ];
 
+    ];
+    $form['#tree'] = TRUE;
     $attributes = menu_attributes_get_menu_attribute_info();
     foreach ($attributes as $attribute => $info) {
       $form['attributes'][$attribute] = [
@@ -62,17 +63,17 @@ class MenuAttributesSettingsForm extends ConfigFormBase {
         '#group' => 'attributes_vertical_tabs',
         '#description' => $info['form']['#description'],
       ];
-      $form['attributes'][$attribute]["menu_attributes_{$attribute}_enable"] = [
+      $form['attributes'][$attribute]['attribute_enable'] = [
         '#type' => 'checkbox',
         '#title' => t('Enable the @attribute attribute.', ['@attribute' => Unicode::strtolower($info['label'])]),
         '#default_value' => $info['enabled'],
       ];
-      $form['attributes'][$attribute]["menu_attributes_{$attribute}_default"] = [
+      $form['attributes'][$attribute]['attribute_default'] = [
         '#title' => t('Default'),
         '#description' => '',
         '#states' => [
           'invisible' => [
-            'input[name="menu_attributes_' . $attribute . '_enable"]' => ['checked' => FALSE],
+            'input[name="attributes[' . $attribute . '][attribute_enable]"]' => ['checked' => FALSE],
           ],
         ],
       ] + $info['form'];
@@ -87,9 +88,12 @@ class MenuAttributesSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
 
-    $this->config('menu_attributes.settings')
-      ->set('', $values['attributes_vertical_tabs'][''])
-      ->save();
+    foreach ($values['attributes'] as $attribute => $value) {
+      $this->config('menu_attributes.settings')
+        ->set('attribute_enable.' . $attribute, $value['attribute_enable'])
+        ->set('attribute_default.' . $attribute, $value['attribute_default'])
+        ->save();
+    }
 
     parent::submitForm($form, $form_state);
   }
