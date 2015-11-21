@@ -6,7 +6,7 @@
 Drupal.behaviors.menuAttributesOptionsSummary = {
   attach: function (context) {
     // Menu item title.
-    $('fieldset#edit-title', context).drupalSetSummary(function (context) {
+    $('#edit-title', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -20,7 +20,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item ID.
-    $('fieldset#edit-id', context).drupalSetSummary(function (context) {
+    $('#edit-id', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -34,7 +34,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item name.
-    $('fieldset#edit-name', context).drupalSetSummary(function (context) {
+    $('#edit-name', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -48,7 +48,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item relationship.
-    $('fieldset#edit-rel', context).drupalSetSummary(function (context) {
+    $('#edit-rel', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -62,7 +62,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item classes.
-    $('fieldset#edit-class', context).drupalSetSummary(function (context) {
+    $('#edit-class', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -76,7 +76,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item style.
-    $('fieldset#edit-style', context).drupalSetSummary(function (context) {
+    $('#edit-style', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -90,7 +90,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item target.
-    $('fieldset#edit-target', context).drupalSetSummary(function (context) {
+    $('#edit-target', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
@@ -100,7 +100,7 @@ Drupal.behaviors.menuAttributesOptionsSummary = {
     });
 
     // Menu item access key.
-    $('fieldset#edit-accesskey', context).drupalSetSummary(function (context) {
+    $('#edit-accesskey', context).drupalSetSummary(function (context) {
       if (!$('input[type="checkbox"]:checked', context).val()) {
         return Drupal.t('Disabled');
       }
