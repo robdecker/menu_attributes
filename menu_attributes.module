@@ -7,13 +7,13 @@
  */
 
 use Drupal\Component\Utility\Unicode;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 
 define('MENU_ATTRIBUTES_LINK', 'attributes');
 define('MENU_ATTRIBUTES_ITEM', 'item_attributes');
-
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -206,9 +206,7 @@ function _menu_attributes_form_alter(array &$form, array $item = [], array &$com
         // If this is an existing link, use the raw default (usually empty).
         $info['form']['#default_value'] = $info['default'];
       }
-      $form['options'][$group][$attribute] = $info['form'] + [
-        '#access' => $info['enabled'],
-        ];
+      $form['options'][$group][$attribute] = $info['form'] + ['#access' => $info['enabled']];
     }
   }
 
