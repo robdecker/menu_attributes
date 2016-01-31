@@ -133,7 +133,19 @@ function menu_attributes_get_menu_attribute_info() {
  * @see _menu_attributes_form_alter()
  * @see menu_attributes_form_menu_edit_item_submit()
  */
-function menu_attributes_form_menu_link_edit_alter(&$form, FormStateInterface $form_state) {
+function menu_attributes_form_menu_link_edit_alter(array &$form) {
+  _menu_attributes_form_alter($form, $form, $form);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ *
+ * Adds menu attribute options to the menu_link_content_form.
+ *
+ * @see _menu_attributes_form_alter()
+ * @see menu_attributes_form_menu_edit_item_submit()
+ */
+function menu_attributes_form_menu_link_content_form_alter(array &$form) {
   _menu_attributes_form_alter($form, $form, $form);
 }
 
