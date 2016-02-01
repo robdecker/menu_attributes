@@ -295,7 +295,7 @@ function menu_attributes_preprocess_menu_link(&$variables) {
         // Class get's special treatment, as it's an array and it should not
         // replace existing values.
         if ($attribute == 'class') {
-          $value = explode(' ', $value);
+          $value = is_array($value) ? explode(' ', $value) : $value;
           if (isset($attributes[$attribute])) {
             $value = array_merge($attributes[$attribute], $value);
           }
