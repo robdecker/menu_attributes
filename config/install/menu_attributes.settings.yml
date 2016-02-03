@@ -6,7 +6,7 @@ attribute_enable:
   class: true
   style: false
   target: true
-  tabindex: true
+  accesskey: true
 attribute_default:
   title: ''
   id: ''
@@ -15,4 +15,4 @@ attribute_default:
   class: ''
   style: ''
   target: ''
-  tabindex: ''
+  accesskey: ''

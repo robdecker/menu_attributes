@@ -29,9 +29,9 @@ menu_attributes.settings:
         target:
           type: boolean
           label: 'Enable target attribute'
-        tabindex:
+        accesskey:
           type: boolean
-          label: 'Enable tabindex attribute'
+          label: 'Enable accesskey attribute'
     attribute_default:
       type: mapping
       label: 'Enabled attributes'
@@ -57,6 +57,6 @@ menu_attributes.settings:
         target:
           type: string
           label: 'Target attribute default value'
-        tabindex:
+        accesskey:
           type: string
-          label: 'Tabindex attribute default value'
+          label: 'Accesskey attribute default value'
