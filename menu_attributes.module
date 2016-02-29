@@ -6,13 +6,16 @@
  * attributes for the menu link
  */
 
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\Unicode;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuLinkInterface;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Url;
 
-define('MENU_ATTRIBUTES_LINK', 'attributes');
+define('MENU_ATTRIBUTES', 'menu_attributes');
+define('MENU_ATTRIBUTES_LINK', 'link_attributes');
 define('MENU_ATTRIBUTES_ITEM', 'item_attributes');
 
 /**
@@ -111,7 +114,6 @@ function menu_attributes_get_menu_attribute_info() {
     $info += [
       'form' => [],
       'enabled' => $config->get('attribute_enable.' . $attribute),
-      '#default_value' => $config->get('attribute_enable.' . $attribute),
     ];
     $info['form'] += [
       '#type' => 'textfield',
@@ -133,9 +135,30 @@ function menu_attributes_get_menu_attribute_info() {
  * @see _menu_attributes_form_alter()
  * @see menu_attributes_form_menu_edit_item_submit()
  */
-function menu_attributes_form_menu_link_edit_alter(array &$form) {
-  _menu_attributes_form_alter($form, $form, $form);
+function menu_attributes_form_menu_link_edit_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  _menu_attributes_form_alter($form, $form_state, $form_id);
 }
+
+function menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['menu']['link']) && isset($form['#node']->menu)) {
+    $item = $form['#node']->menu;
+    _menu_attributes_form_alter($form['menu']['link'], $form['menu']['link'], $form);
+  }
+}
+
+//function menu_attributes_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+//  // Modification for the form with the given BASE_FORM_ID goes here. For
+//  // example, if BASE_FORM_ID is "node_form", this code would run on every
+//  // node form, regardless of node type.
+//
+//  // Add a checkbox to the node form about agreeing to terms of use.
+//  $form['terms_of_use'] = array(
+//    '#type' => 'checkbox',
+//    '#title' => t("I agree with the website's terms and conditions."),
+//    '#required' => TRUE,
+//  );
+//}
+
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
@@ -145,8 +168,8 @@ function menu_attributes_form_menu_link_edit_alter(array &$form) {
  * @see _menu_attributes_form_alter()
  * @see menu_attributes_form_menu_edit_item_submit()
  */
-function menu_attributes_form_menu_link_content_form_alter(array &$form) {
-  _menu_attributes_form_alter($form, $form, $form);
+function menu_attributes_form_menu_link_content_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  _menu_attributes_form_alter($form, $form_state, $form_id);
 }
 
 /**
@@ -171,14 +194,8 @@ function menu_attributes_form_node_form_alter(&$form, FormStateInterface $form_s
  * @param $item
  *   The optional existing menu item for context.
  */
-function _menu_attributes_form_alter(array &$form, array $item = [], array &$complete_form) {
-  $form['options']['#tree'] = TRUE;
-  $form['options']['#weight'] = 50;
-
-  // Unset the previous value so that the new values get saved.
-  unset($form['options']['#value']['attributes']);
-  unset($form['options']['#value']['item_attributes']);
-
+//function _menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
+function _menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   $form['options'][MENU_ATTRIBUTES_LINK] = [
     '#type' => 'details',
     '#title' => t('Menu link attributes'),
@@ -195,70 +212,55 @@ function _menu_attributes_form_alter(array &$form, array $item = [], array &$com
     '#tree' => TRUE,
   ];
 
+  // Menu links are stored differently depending on the type.
+  if ($form_state->getFormObject() instanceof \Drupal\menu_link_content\Form\MenuLinkContentForm) {
+    $menu_link = $form_state->getFormObject()->getEntity();
+    $menu_link_options = $menu_link->link->first()->options ?: [];
+    $menu_attributes[MENU_ATTRIBUTES_LINK] = isset($menu_link_options[MENU_ATTRIBUTES][MENU_ATTRIBUTES_LINK]) ? $menu_link_options[MENU_ATTRIBUTES][MENU_ATTRIBUTES_LINK] : [];
+    $menu_attributes[MENU_ATTRIBUTES_ITEM] = isset($menu_link_options[MENU_ATTRIBUTES][MENU_ATTRIBUTES_ITEM]) ? $menu_link_options[MENU_ATTRIBUTES][MENU_ATTRIBUTES_ITEM] : [];
+  }
+  elseif ($form_state->getFormObject() instanceof \Drupal\Core\Menu\Form\MenuLinkFormInterface) {
+    $plugin_definition = $form_state->getFormObject()->extractFormValues($form, $form_state);
+    $menu_attributes[MENU_ATTRIBUTES_LINK] = isset($plugin_definition['options'][MENU_ATTRIBUTES][MENU_ATTRIBUTES_LINK]) ? $plugin_definition['options'][MENU_ATTRIBUTES][MENU_ATTRIBUTES_LINK] : [];
+    $menu_attributes[MENU_ATTRIBUTES_ITEM] = isset($plugin_definition['options'][MENU_ATTRIBUTES][MENU_ATTRIBUTES_ITEM]) ? $plugin_definition['options'][MENU_ATTRIBUTES][MENU_ATTRIBUTES_ITEM] : [];
+  }
+  else {
+    return;
+  }
+
   $attributes = menu_attributes_get_menu_attribute_info();
   foreach ($attributes as $attribute => $info) {
-    // If no scope is set, this attribute should be available to both link
-    // and item.
+    // If no scope is set, this attribute should be available to both link and item.
     if (!isset($info['scope'])) {
       $info['scope'] = [MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM];
     }
 
     // Define fields for each scope.
     foreach ($info['scope'] as $group) {
-      // Merge in the proper default value.
-      if (isset($item['options'][$group][$attribute])) {
-        // If the menu link already has this attribute, use it.
-        $info['form']['#default_value'] = $item['options'][$group][$attribute];
-        // Convert the classes array to a string for the form.
-        if ($attribute == 'class' && is_array($info['form']['#default_value'])) {
-          $info['form']['#default_value'] = implode(' ', $info['form']['#default_value']);
-        }
+      if (isset($menu_attributes[$group][$attribute])) {
+        $info['form']['#default_value'] = $menu_attributes[$group][$attribute];
       }
-      elseif ($item['mlid']) {
-        // If this is an existing link, use the raw default (usually empty).
-        $info['form']['#default_value'] = $info['default'];
-      }
-      $form['options'][$group][$attribute] = $info['form'] + ['#access' => $info['enabled']];
-    }
-  }
 
-  // Add form values for the reset of $item['options'] and
-  // $item['options']['attributes'] so the values will carry over during save.
-  foreach ($item['options'] as $key => $value) {
-    if ($key !== 'attributes' && !isset($form['options'][$key])) {
-      $form['options'][$key] = [
-        '#type' => 'value',
-        '#value' => $value,
-      ];
-    }
-  }
-  foreach ([MENU_ATTRIBUTES_LINK, MENU_ATTRIBUTES_ITEM] as $group) {
-    if (isset($item['options'][$group])) {
-      foreach ($item['options'][$group] as $key => $value) {
-        if (!isset($form['options'][$group][$key])) {
-          $form['options'][$group][$key] = [
-            '#type' => 'value',
-            '#value' => $value,
-          ];
-        }
-      }
+      $form['options'][$group][$attribute] = $info['form'] + [
+        '#access' => $info['enabled'],
+        ];
     }
   }
 
   // Hide the 'description' field since we will be using our own 'title' field.
   if (isset($form['description'])) {
     $form['description']['#access'] = FALSE;
-
-    // Because this form uses a special $form['description'] field which is
-    // really the 'title' attribute, we need to add special pre-submit handling
-    // to ensure our field gets saved as the title attribute.
-    array_unshift($complete_form['#submit'], '_menu_attributes_form_submit');
   }
 
   // Restrict access to the new form elements.
-  $has_visible_children = (bool) Element::getVisibleChildren($form['options']['attributes']);
+  $has_visible_children = (bool) Element::getVisibleChildren($form['options']['link_attributes']);
+  if (!$has_visible_children) {
+    $has_visible_children = (bool) Element::getVisibleChildren($form['options']['link_attributes']);
+  }
   $user_has_access = \Drupal::currentUser()->hasPermission('administer menu attributes');
   $form['options']['attributes']['#access'] = ($has_visible_children && $user_has_access);
+
+  $form['actions']['submit']['#submit'][] = '_menu_attributes_form_submit';
 }
 
 /**
@@ -268,14 +270,26 @@ function _menu_attributes_form_alter(array &$form, array $item = [], array &$com
  * will get properly saved.
  */
 function _menu_attributes_form_submit($form, FormStateInterface $form_state) {
-  $values = $form_state->getValues();
+  $options = array(
+    MENU_ATTRIBUTES => array(
+      MENU_ATTRIBUTES_LINK => $form_state->getValue(MENU_ATTRIBUTES_LINK),
+      MENU_ATTRIBUTES_ITEM => $form_state->getValue(MENU_ATTRIBUTES_ITEM),
+    ),
+  );
 
-  if (isset($values['menu']['options']['attributes']['title'])) {
-    $values['menu']['description'] = $values['menu']['options']['attributes']['title'];
+  // Menu links are stored differently depending on the type.
+  if ($form_state->getFormObject() instanceof \Drupal\menu_link_content\Form\MenuLinkContentForm) {
+    $menu_link = $form_state->getFormObject()->getEntity();
+    $menu_link->link->first()->options = $options;
+    $menu_link->save();
   }
-  elseif (isset($values['options']['attributes']['title'])) {
-    $values['description'] = $values['options']['attributes']['title'];
+  elseif ($form_state->getFormObject() instanceof \Drupal\Core\Menu\Form\MenuLinkFormInterface) {
+    $plugin_definition = $form_state->getFormObject()->extractFormValues($form, $form_state);
+    $plugin_definition['options'] = $options;
+    $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
+    $menu_link_manager->updateDefinition($plugin_definition['id'], $plugin_definition);
   }
+
 }
 
 /**
@@ -308,4 +322,79 @@ function menu_attributes_preprocess_menu_link(&$variables) {
     // Clean up, so we're not passing this to l().
     unset($options['item_attributes']);
   }
+}
+
+/**
+ * Implements hook_preprocess_menu().
+ */
+function menu_attributes_preprocess_menu(&$variables) {
+  foreach ($variables['items'] as &$item) {
+    $menu_attributes = menu_attributes_get_attributes($item['original_link']);
+    $menu_link_attributes = array_filter($menu_attributes[MENU_ATTRIBUTES_LINK]);
+    $menu_item_attributes = array_filter($menu_attributes[MENU_ATTRIBUTES_ITEM]);
+
+    if (count($menu_link_attributes)) {
+      $url_attributes = $item['url']->getOption('attributes') ?: [];
+      $attributes = array_merge($url_attributes, $menu_link_attributes);
+      $item['url']->setOption('attributes', $attributes);
+    }
+
+    if (count($menu_item_attributes)) {
+      foreach ($menu_item_attributes as $attribute => $info) {
+        $item['attributes']->setAttribute($attribute, $info);
+      }
+    }
+  }
+}
+
+/**
+ * Get menu link attributes.
+ *
+ * @param \Drupal\Core\Menu\MenuLinkInterface $menu_link
+ *
+ * @return array
+ */
+function menu_attributes_get_attributes(MenuLinkInterface $menu_link) {
+  $attributes = [];
+
+  try {
+    $plugin_id = $menu_link->getPluginId();
+  }
+  catch (PluginNotFoundException $e) {
+    return $attributes;
+  }
+  $menu_link_manager = \Drupal::service('plugin.manager.menu.link');
+  $definition = $menu_link_manager->getDefinition($plugin_id);
+
+  if ($definition['provider'] == 'menu_link_content') {
+    if (strpos($plugin_id, ':') === FALSE) {
+      return $attributes;
+    }
+
+    list($entity_type_id, $uuid) = explode(':', $plugin_id, 2);
+    $entity = \Drupal::service('entity.repository')->loadEntityByUuid($entity_type_id, $uuid);
+
+    if ($entity) {
+      $options = $entity->link->first()->options[MENU_ATTRIBUTES];
+    }
+  }
+  else {
+    $options = $definition['options'][MENU_ATTRIBUTES];
+  }
+
+
+  if ($options) {
+    $attributes[MENU_ATTRIBUTES_LINK] = isset($options[MENU_ATTRIBUTES_LINK]) ? $options[MENU_ATTRIBUTES_LINK] : [];
+    $attributes[MENU_ATTRIBUTES_ITEM] = isset($options[MENU_ATTRIBUTES_ITEM]) ? $options[MENU_ATTRIBUTES_ITEM] : [];
+
+    // Class attribute needs special handling because it's stored as an array.
+    if (isset($attributes[MENU_ATTRIBUTES_LINK]['class'])) {
+      $attributes[MENU_ATTRIBUTES_LINK]['class'] = explode(' ', $attributes[MENU_ATTRIBUTES_LINK]['class']);
+    }
+    if (isset($attributes[MENU_ATTRIBUTES_ITEM]['class'])) {
+      $attributes[MENU_ATTRIBUTES_ITEM]['class'] = explode(' ', $attributes[MENU_ATTRIBUTES_ITEM]['class']);
+    }
+  }
+
+  return $attributes;
 }
