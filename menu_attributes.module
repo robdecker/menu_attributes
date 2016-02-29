@@ -136,6 +136,10 @@ function menu_attributes_get_menu_attribute_info() {
  * @see menu_attributes_form_menu_edit_item_submit()
  */
 function menu_attributes_form_menu_link_edit_alter(array &$form, FormStateInterface $form_state, $form_id) {
+  //
+  if (empty($form_state->getValue('id'))) {
+    $form_state->setValue('id', $form['id']['#value']);
+  }
   _menu_attributes_form_alter($form, $form_state, $form_id);
 }
 
