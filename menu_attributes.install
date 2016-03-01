@@ -12,6 +12,7 @@ function menu_attributes_install() {
   // Weight needs to be lower than that of menu_ui.
   module_set_weight('menu_attributes', 10);
   // The service container should be cleared from cache so weight will be used.
+  // This shouldn't be required. @see https://www.drupal.org/node/2679008
   \Drupal::service('kernel')->invalidateContainer();
 }
 
