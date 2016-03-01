@@ -136,33 +136,11 @@ function menu_attributes_get_menu_attribute_info() {
  * @see menu_attributes_form_menu_edit_item_submit()
  */
 function menu_attributes_form_menu_link_edit_alter(array &$form, FormStateInterface $form_state, $form_id) {
-  //
   if (empty($form_state->getValue('id'))) {
     $form_state->setValue('id', $form['id']['#value']);
   }
   _menu_attributes_form_alter($form, $form_state, $form_id);
 }
-
-function menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
-  if (isset($form['menu']['link']) && isset($form['#node']->menu)) {
-    $item = $form['#node']->menu;
-    _menu_attributes_form_alter($form['menu']['link'], $form['menu']['link'], $form);
-  }
-}
-
-//function menu_attributes_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
-//  // Modification for the form with the given BASE_FORM_ID goes here. For
-//  // example, if BASE_FORM_ID is "node_form", this code would run on every
-//  // node form, regardless of node type.
-//
-//  // Add a checkbox to the node form about agreeing to terms of use.
-//  $form['terms_of_use'] = array(
-//    '#type' => 'checkbox',
-//    '#title' => t("I agree with the website's terms and conditions."),
-//    '#required' => TRUE,
-//  );
-//}
-
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
@@ -198,7 +176,6 @@ function menu_attributes_form_node_form_alter(&$form, FormStateInterface $form_s
  * @param $item
  *   The optional existing menu item for context.
  */
-//function _menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
 function _menu_attributes_form_alter(array &$form, FormStateInterface $form_state, $form_id) {
   $form['options'][MENU_ATTRIBUTES_LINK] = [
     '#type' => 'details',

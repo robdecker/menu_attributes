@@ -9,7 +9,10 @@
  * Implements hook_install().
  */
 function menu_attributes_install() {
-
+  // Weight needs to be lower than that of menu_ui.
+  module_set_weight('menu_attributes', 10);
+  // The service container should be cleared from cache so weight will be used.
+  \Drupal::service('kernel')->invalidateContainer();
 }
 
 /**
